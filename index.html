@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For My Special Someone ❤️</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Playfair Display', serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            overflow: hidden;
+            height: 100vh;
+            color: #fff;
+        }
+
+        #book-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            perspective: 2000px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .book {
+            position: relative;
+            width: 85%;
+            max-width: 900px;
+            height: 80%;
+            transform-style: preserve-3d;
+            transition: transform 0.8s cubic-bezier(0.645, 0.045, 0.355, 1);
+        }
+
+        .page {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            transform-origin: left center;
+            transform-style: preserve-3d;
+            transition: transform 1.2s cubic-bezier(0.645, 0.045, 0.355, 1);
+            border-radius: 10px 20px 20px 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
+        }
+
+        .page-front, .page-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 10px;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .page-front {
+            background: linear-gradient(135deg, #ffafbd 0%, #ffc3a0 100%);
+            color: #333;
+            z-index: 2;
+        }
+
+        .page-back {
+            background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
+            color: #333;
+            transform: rotateY(180deg);
+        }
+
+        .page.active {
+            z-index: 10;
+        }
+
+        .page.flipped {
+            transform: rotateY(-180deg);
+        }
+
+        .page-cover {
+            background: linear-gradient(45deg, #ff6b6b, #ffa8a8);
+            z-index: 20;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .page-cover .page-front {
+            background: linear-gradient(45deg, #ff6b6b, #ffa8a8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .floral-border {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            opacity: 0.1;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cpath d='M50,20 C60,10 80,15 80,30 C80,45 65,50 50,50 C35,50 20,45 20,30 C20,15 40,10 50,20 Z' fill='none' stroke='%23ffffff' stroke-width='1'/%3E%3C/svg%3E");
+            background-size: 100px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #ff6b6b, #ffa8a8);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+            transition: all 0.3s ease;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.1rem;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.6);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .text-gradient {
+            background: linear-gradient(135deg, #d63384, #e64980, #ec4899);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .heart-beat {
+            animation: heartbeat 1.5s ease-in-out infinite;
+        }
+
+        @keyframes heartbeat {
+            0%, 50%, 100% { transform: scale(1); }
+            25%, 75% { transform: scale(1.1); }
+        }
+
+        .emoji {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+
+        .floating {
+            animation: floating 3s ease-in-out infinite;
+        }
+
+        @keyframes floating {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .sparkle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 10px 2px #fff;
+            animation: sparkle 2s infinite;
+        }
+
+        @keyframes sparkle {
+            0%, 100% { opacity: 0; transform: scale(0); }
+            50% { opacity: 1; transform: scale(1); }
+        }
+
+        .memory-box {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .memory-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        #particles-js {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .page-number {
+            position: absolute;
+            bottom: 15px;
+            right: 20px;
+            font-size: 0.9rem;
+            color: rgba(0, 0, 0, 0.5);
+        }
+
+        .envelope {
+            position: absolute;
+            width: 300px;
+            height: 200px;
+            background: #ff6b6b;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            z-index: 30;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.5s ease;
+        }
+
+        .envelope:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 0;
+            border-left: 150px solid transparent;
+            border-right: 150px solid transparent;
+            border-top: 100px solid #ff8e8e;
+            z-index: 2;
+        }
+
+        .envelope .letter {
+            position: absolute;
+            width: 90%;
+            height: 85%;
+            background: white;
+            border-radius: 5px;
+            z-index: 1;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.5s ease;
+            transform: translateY(0);
+        }
+
+        .envelope.open .letter {
+            transform: translateY(-100px);
+            transition-delay: 0.3s;
+        }
+
+        .envelope.open {
+            transform: translateY(100px) scale(0.9);
+            z-index: 25;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="particles-js"></div>
+    
+    <div id="book-container">
+        <div class="book">
+            <!-- Cover Page -->
+            <div class="page page-cover active" id="cover">
+                <div class="page-front">
+                    <div class="floral-border"></div>
+                    <div class="emoji heart-beat">💖</div>
+                    <h1 class="text-5xl md:text-6xl font-bold mb-6" style="color: #fff;">For You</h1>
+                    <p class="text-xl text-gray-800 mb-8 max-w-md">A special message for someone incredibly special</p>
+                    <button class="btn open-book-btn">Open Your Gift</button>
+                </div>
+            </div>
+
+            <!-- Page 1 -->
+            <div class="page" id="page1">
+                <div class="page-front">
+                    <div class="floral-border"></div>
+                    <div class="emoji floating">🎉</div>
+                    <h2 class="text-4xl md:text-5xl font-bold mb-6" style="color: #d63384;">Happy Birthday!</h2>
+                    <p class="text-lg text-gray-800 mb-6 max-w-lg">
+                        On your special day, I want you to know how much you mean to me. 
+                        Your presence in my life is a gift I cherish every single day.
+                    </p>
+                    <button class="btn next-page-btn">Turn Page</button>
+                    <div class="page-number">1</div>
+                </div>
+                <div class="page-back">
+                    <div class="floral-border"></div>
+                    <h2 class="text-3xl md:text-4xl font-bold mb-6 text-gradient">What Makes You Special</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8 w-full max-w-2xl">
+                        <div class="memory-box">
+                            <div class="emoji text-2xl">✨</div>
+                            <h3 class="text-xl font-bold mb-2" style="color: #d63384;">Your Kind Heart</h3>
+                            <p class="text-gray-700">The way you care for others inspires me every day.</p>
+                        </div>
+                        <div class="memory-box">
+                            <div class="emoji text-2xl">😊</div>
+                            <h3 class="text-xl font-bold mb-2" style="color: #d63384;">Your Beautiful Smile</h3>
+                            <p class="text-gray-700">It lights up my world and makes everything better.</p>
+                        </div>
+                        <div class="memory-box">
+                            <div class="emoji text-2xl">🌟</div>
+                            <h3 class="text-xl font-bold mb-2" style="color: #d63384;">Your Amazing Spirit</h3>
+                            <p class="text-gray-700">Your passion and energy are truly contagious.</p>
+                        </div>
+                        <div class="memory-box">
+                            <div class="emoji text-2xl">💫</div>
+                            <h3 class="text-xl font-bold mb-2" style="color: #d63384;">Your Inner Strength</h3>
+                            <p class="text-gray-700">You overcome challenges with grace and determination.</p>
+                        </div>
+                    </div>
+                    <button class="btn next-page-btn">Turn Page</button>
+                    <div class="page-number">2</div>
+                </div>
+            </div>
+
+            <!-- Page 2 -->
+            <div class="page" id="page2">
+                <div class="page-front">
+                    <div class="floral-border"></div>
+                    <h2 class="text-3xl md:text-4xl font-bold mb-6" style="color: #d63384;">Our Special Moments</h2>
+                    <p class="text-lg text-gray-800 mb-6 max-w-lg">
+                        Every moment with you becomes a precious memory. 
+                        Whether we're together or enjoying peaceful silence, 
+                        time with you is always magical.
+                    </p>
+                    <div class="memory-box w-full max-w-lg">
+                        <div class="emoji text-2xl">💑</div>
+                        <h3 class="text-xl font-bold mb-2" style="color: #d63384;">Remember When...</h3>
+                        <p class="text-gray-700">We spent the whole day together at the national park? That moment was so special for me.</p>
+                    </div>
+                    <button class="btn next-page-btn">Turn Page</button>
+                    <div class="page-number">3</div>
+                </div>
+                <div class="page-back">
+                    <div class="floral-border"></div>
+                    <h2 class="text-3xl md:text-4xl font-bold mb-6 text-gradient">My Wish For You</h2>
+                    <p class="text-lg text-gray-800 mb-6 max-w-lg">
+                        May this year bring you endless joy, laughter that fills your soul, 
+                        and dreams that soar higher than ever before.
+                    </p>
+                    <div class="memory-box w-full max-w-lg">
+                        <div class="emoji text-2xl">🎂</div>
+                        <h3 class="text-xl font-bold mb-2" style="color: #d63384;">Birthday Blessings</h3>
+                        <p class="text-gray-700">May you always know how incredibly special you are to me and everyone around you.</p>
+                    </div>
+                    <button class="btn next-page-btn">Turn Page</button>
+                    <div class="page-number">4</div>
+                </div>
+            </div>
+
+            <!-- Last Page -->
+            <div class="page" id="page3">
+                <div class="page-front">
+                    <div class="floral-border"></div>
+                    <div class="emoji heart-beat">💝</div>
+                    <h2 class="text-4xl md:text-5xl font-bold mb-6" style="color: #d63384;">Happy Birthday, Zenab!</h2>
+                    <p class="text-xl text-gray-800 mb-8 max-w-md">
+                        You deserve all the happiness in the world today and always.
+                    </p>
+                    <p class="text-2xl font-semibold mb-8" style="color: #d63384;">
+                        You are the most beautiful part of my life ❤️
+                    </p>
+                    <button class="btn" id="final-celebration">Celebrate!</button>
+                    <div class="page-number">5</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Envelope Element -->
+    <div class="envelope" id="envelope">
+        <div class="letter">
+            <h3 class="text-xl font-bold mb-2" style="color: #d63384;">A Special Note</h3>
+            <p class="text-gray-700">You make every day brighter just by being you. Happy Birthday!</p>
+        </div>
+    </div>
+
+    <script>
+        // Initialize particles background
+        document.addEventListener('DOMContentLoaded', function() {
+            // Create simple particles without external library
+            const particlesContainer = document.getElementById('particles-js');
+            for (let i = 0; i < 50; i++) {
+                const sparkle = document.createElement('div');
+                sparkle.className = 'sparkle';
+                sparkle.style.left = `${Math.random() * 100}%`;
+                sparkle.style.top = `${Math.random() * 100}%`;
+                sparkle.style.animationDelay = `${Math.random() * 5}s`;
+                particlesContainer.appendChild(sparkle);
+            }
+
+            // Page turning logic
+            const pages = document.querySelectorAll('.page');
+            const nextButtons = document.querySelectorAll('.next-page-btn');
+            const openBookBtn = document.querySelector('.open-book-btn');
+            const finalCelebrationBtn = document.getElementById('final-celebration');
+            const envelope = document.getElementById('envelope');
+            
+            let currentPageIndex = 0;
+            
+            // Open book
+            openBookBtn.addEventListener('click', function() {
+                document.querySelector('.book').style.transform = 'rotateY(10deg)';
+                pages[0].classList.remove('active');
+                pages[0].classList.add('flipped');
+                pages[1].classList.add('active');
+                currentPageIndex = 1;
+                
+                // Show envelope after a delay
+                setTimeout(() => {
+                    envelope.style.display = 'flex';
+                    setTimeout(() => {
+                        envelope.classList.add('open');
+                    }, 500);
+                }, 1000);
+            });
+            
+            // Next page buttons
+            nextButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    if (currentPageIndex < pages.length - 1) {
+                        pages[currentPageIndex].classList.remove('active');
+                        pages[currentPageIndex].classList.add('flipped');
+                        currentPageIndex++;
+                        pages[currentPageIndex].classList.add('active');
+                        
+                        // Special effect for last page
+                        if (currentPageIndex === pages.length - 1) {
+                            document.querySelector('.book').style.transform = 'rotateY(0deg)';
+                        }
+                    }
+                });
+            });
+            
+            // Final celebration
+            finalCelebrationBtn.addEventListener('click', function() {
+                // Confetti explosion
+                confetti({
+                    particleCount: 150,
+                    spread: 70,
+                    origin: { y: 0.6 },
+                    colors: ['#ff0000', '#ff69b4', '#ff1493', '#ffc0cb']
+                });
+                
+                setTimeout(() => confetti({
+                    particleCount: 100,
+                    spread: 60,
+                    origin: { y: 0.5 },
+                    shapes: ['circle', 'square'],
+                    colors: ['#ff6b6b', '#ffa8a8', '#ffd166', '#06d6a0']
+                }), 300);
+                
+                setTimeout(() => {
+                    confetti({
+                        particleCount: 50,
+                        angle: 60,
+                        spread: 55,
+                        origin: { x: 0 },
+                        shapes: ['heart'],
+                        colors: ['#ff0000', '#ff69b4']
+                    });
+                    confetti({
+                        particleCount: 50,
+                        angle: 120,
+                        spread: 55,
+                        origin: { x: 1 },
+                        shapes: ['heart'],
+                        colors: ['#ff0000', '#ff69b4']
+                    });
+                }, 600);
+                
+                // Floating hearts animation
+                for (let i = 0; i < 20; i++) {
+                    setTimeout(() => {
+                        const heart = document.createElement('div');
+                        heart.innerHTML = '💖';
+                        heart.style.position = 'fixed';
+                        heart.style.fontSize = `${Math.random() * 30 + 20}px`;
+                        heart.style.left = `${Math.random() * 100}%`;
+                        heart.style.top = '100%';
+                        heart.style.zIndex = '1000';
+                        heart.style.opacity = '0.8';
+                        document.body.appendChild(heart);
+                        
+                        gsap.to(heart, {
+                            y: -window.innerHeight - 100,
+                            x: Math.random() * 100 - 50,
+                            rotation: Math.random() * 360,
+                            duration: Math.random() * 3 + 3,
+                            ease: "power1.out",
+                            onComplete: () => {
+                                document.body.removeChild(heart);
+                            }
+                        });
+                    }, i * 200);
+                }
+            });
+            
+            // Envelope interaction
+            envelope.addEventListener('click', function() {
+                if (envelope.classList.contains('open')) {
+                    envelope.classList.remove('open');
+                    setTimeout(() => {
+                        envelope.style.display = 'none';
+                    }, 500);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
